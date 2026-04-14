@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Guanaja 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --red: #dc2626;
+      --blue: #2563eb;
+      --gray: #a3a3a3;
+      --amber: #f59e0b;
+      --dark1: #0f172a;
+      --dark2: #1e293b;
+      --green: #10b981;
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1400px, calc(100% - 32px));
+      margin: 24px auto 48px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--dark1), var(--dark2));
+      color: white;
+      border-radius: 30px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1.4fr 1fr;
+    }
+
+    .hero h1 {
+      margin: 12px 0 8px;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1.05;
+    }
+
+    .hero p {
+      margin: 0;
+      color: #cbd5e1;
+      max-width: 760px;
+    }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 10px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: rgba(255,255,255,.12);
+      color: white;
+      border: 1px solid rgba(255,255,255,.15);
+    }
+    .badge.green {
+      background: rgba(16,185,129,.18);
+      color: #d1fae5;
+      border-color: rgba(16,185,129,.2);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      align-self: end;
+    }
+
+    .stat {
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .stat .label {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .stat .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+
+    .grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 20px 10px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .card-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .card-body { padding: 18px 20px 20px; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 13px 14px;
+      font-size: 0.95rem;
+      outline: none;
+      background: white;
+      color: var(--text);
+    }
+    input:focus, select:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 4px rgba(148, 163, 184, .15);
+    }
+
+    .summary-list { display: grid; gap: 10px; }
+    .summary-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 16px;
+      font-size: .96rem;
+    }
+    .summary-item strong { font-size: 1rem; }
+
+    .progress-group { display: grid; gap: 14px; }
+    .progress-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .92rem;
+      margin-bottom: 6px;
+    }
+    .progress-track {
+      height: 11px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-bar { height: 100%; border-radius: 999px; }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+      margin: 22px 0 18px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border: 0;
+      background: transparent;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .tab-btn.active {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 18px;
+    }
+
+    .chart-wrap {
+      height: 430px;
+      position: relative;
+    }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      font-size: .95rem;
+    }
+    thead th {
+      text-align: left;
+      color: var(--muted);
+      font-size: .84rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #fcfdff;
+    }
+    tbody td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #eef2f7;
+    }
+    tbody tr:hover { background: #f8fafc; }
+    .text-right { text-align: right; }
+    .leader {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 800;
+    }
+    .leader.plh { background: #fee2e2; color: #b91c1c; }
+    .leader.pnh { background: #dbeafe; color: #1d4ed8; }
+
+    .centers-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+    }
+    .centers-list { display: grid; gap: 12px; }
+    .center-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      background: white;
+    }
+    .center-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+    .pill {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #334155;
+      font-size: .8rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .mini {
+      border-radius: 14px;
+      padding: 10px;
+      text-align: center;
+      font-size: .82rem;
+      background: #f8fafc;
+    }
+    .mini strong { display: block; margin-top: 4px; font-size: 1rem; }
+
+    .notes { display: grid; gap: 12px; }
+    .note {
+      padding: 16px;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+    .note h4 { margin: 0 0 8px; }
+    .note p { margin: 0; color: #334155; line-height: 1.5; }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: .9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+      .hero, .grid, .charts-grid, .centers-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .container { width: min(100% - 20px, 1400px); }
+      .hero { padding: 20px; }
+      .filters { grid-template-columns: 1fr; }
+      .hero-stats { grid-template-columns: 1fr 1fr; }
+      .mini-grid { grid-template-columns: repeat(2, 1fr); }
+      .tab-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div>
+        <div class="badges">
+          <span class="badge">Repetición electoral</span>
+          <span class="badge green">Guanaja · 12 abril 2026</span>
+        </div>
+        <h1>Dashboard de resultados municipales</h1>
+        <p>
+          Consolidación por partido y detalle por JRV para la repetición de elecciones en Guanaja,
+          Islas de la Bahía. Todo en un solo archivo HTML, porque GitHub Pages también merece cariño.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="label">JRVs</div>
+          <div class="value" id="stat-jrvs">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Votos totales</div>
+          <div class="value" id="stat-total">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Partido líder</div>
+          <div class="value" id="stat-winner">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Diferencia</div>
+          <div class="value" id="stat-diff">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="card-header">
+          <h2 class="card-title">Filtros</h2>
+          <p class="card-subtitle">Buscar por JRV, sector o centro de votación.</p>
+        </div>
+        <div class="card-body">
+          <div class="filters">
+            <input id="searchInput" type="text" placeholder="Ej. 13431 o Savannah" />
+            <select id="sectorSelect"></select>
+            <select id="centroSelect"></select>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <h2 class="card-title">Consolidado</h2>
+          <p class="card-subtitle">Totales del subconjunto filtrado.</p>
+        </div>
+        <div class="card-body">
+          <div class="summary-list">
+            <div class="summary-item"><span>PLH</span><strong id="sum-plh">0</strong></div>
+            <div class="summary-item"><span>PNH</span><strong id="sum-pnh">0</strong></div>
+            <div class="summary-item"><span>Blancos</span><strong id="sum-blanco">0</strong></div>
+            <div class="summary-item"><span>Nulos</span><strong id="sum-nulo">0</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <h2 class="card-title">Lectura rápida</h2>
+          <p class="card-subtitle">Resumen porcentual del resultado.</p>
+        </div>
+        <div class="card-body">
+          <div class="progress-group" id="progressGroup"></div>
+        </div>
+      </article>
+    </section>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="consolidado">Consolidado</button>
+      <button class="tab-btn" data-tab="detalle">Detalle por JRV</button>
+      <button class="tab-btn" data-tab="centros">Centros</button>
+    </div>
+
+    <section id="tab-consolidado" class="tab-panel active">
+      <div class="charts-grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Votos por JRV</h2>
+            <p class="card-subtitle">Comparativo de PLH y PNH, con blancos y nulos.</p>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Participación del voto</h2>
+            <p class="card-subtitle">Distribución total del resultado consolidado.</p>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="tab-detalle" class="tab-panel">
+      <article class="card">
+        <div class="card-header">
+          <h2 class="card-title">Detalle de cada JRV</h2>
+          <p class="card-subtitle">Vista tabular con sector, centro de votación y desglose de votos.</p>
+        </div>
+        <div class="card-body table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>JRV</th>
+                <th>Sector</th>
+                <th>Centro</th>
+                <th class="text-right">PLH</th>
+                <th class="text-right">PNH</th>
+                <th class="text-right">Blanco</th>
+                <th class="text-right">Nulo</th>
+                <th class="text-right">Total</th>
+                <th class="text-right">Líder</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="tab-centros" class="tab-panel">
+      <div class="centers-grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Consolidado por centro</h2>
+            <p class="card-subtitle">Sumatoria de votos agrupada por centro de votación.</p>
+          </div>
+          <div class="card-body">
+            <div class="centers-list" id="centersList"></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Observaciones</h2>
+            <p class="card-subtitle">Hallazgos rápidos sobre la consolidación leída del PDF.</p>
+          </div>
+          <div class="card-body">
+            <div class="notes" id="notes"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="footer">
+      Fuente de datos cargada manualmente desde actas escaneadas de la repetición electoral de Guanaja 2026.
+    </div>
+  </div>
+
+  <script>
+    const DATA = [
+      { jrv: 13425, sector: "Guanaja", centro: "Esc. Cristóbal Colón", plh: 69, pnh: 2, blanco: 0, nulo: 0, total: 71 },
+      { jrv: 13426, sector: "Guanaja", centro: "Esc. Cristóbal Colón", plh: 74, pnh: 0, blanco: 1, nulo: 0, total: 75 },
+      { jrv: 13427, sector: "Guanaja", centro: "Esc. Cristóbal Colón", plh: 56, pnh: 2, blanco: 1, nulo: 0, total: 59 },
+      { jrv: 13428, sector: "Guanaja", centro: "Esc. Cristóbal Colón", plh: 58, pnh: 3, blanco: 0, nulo: 0, total: 61 },
+      { jrv: 13429, sector: "Guanaja", centro: "Esc. Cristóbal Colón", plh: 72, pnh: 2, blanco: 0, nulo: 0, total: 74 },
+      { jrv: 13430, sector: "Guanaja", centro: "Esc. Cristóbal Colón", plh: 103, pnh: 1, blanco: 0, nulo: 0, total: 104 },
+      { jrv: 13431, sector: "Mangrove Bight", centro: "Esc. José Trinidad Cabañas", plh: 94, pnh: 3, blanco: 1, nulo: 0, total: 98 },
+      { jrv: 13432, sector: "Mangrove Bight", centro: "Esc. José Trinidad Cabañas", plh: 95, pnh: 2, blanco: 0, nulo: 0, total: 97 },
+      { jrv: 13433, sector: "Mangrove Bight", centro: "Esc. José Trinidad Cabañas", plh: 105, pnh: 2, blanco: 1, nulo: 0, total: 108 },
+      { jrv: 13434, sector: "Savannah Bight", centro: "Esc. José Cecilio del Valle", plh: 74, pnh: 2, blanco: 0, nulo: 0, total: 76 },
+      { jrv: 13435, sector: "Savannah Bight", centro: "Esc. José Cecilio del Valle", plh: 62, pnh: 3, blanco: 1, nulo: 0, total: 66 },
+      { jrv: 13436, sector: "Savannah Bight", centro: "Esc. José Cecilio del Valle", plh: 68, pnh: 3, blanco: 0, nulo: 1, total: 72 },
+      { jrv: 13437, sector: "Coop. Armadores", centro: "Esc. Modesto Rodas Alvarado", plh: 40, pnh: 0, blanco: 0, nulo: 0, total: 40 },
+    ];
+
+    const COLORS = {
+      plh: '#dc2626',
+      pnh: '#2563eb',
+      blanco: '#a3a3a3',
+      nulo: '#f59e0b'
+    };
+
+    const searchInput = document.getElementById('searchInput');
+    const sectorSelect = document.getElementById('sectorSelect');
+    const centroSelect = document.getElementById('centroSelect');
+    const tableBody = document.getElementById('tableBody');
+    const centersList = document.getElementById('centersList');
+    const progressGroup = document.getElementById('progressGroup');
+    const notes = document.getElementById('notes');
+
+    let barChart;
+    let pieChart;
+
+    function formatNumber(value) {
+      return value.toLocaleString('es-HN');
+    }
+
+    function formatPct(value, total) {
+      if (!total) return '0.0%';
+      return ((value / total) * 100).toFixed(1) + '%';
+    }
+
+    function getSectors() {
+      return ['todos', ...new Set(DATA.map(item => item.sector))];
+    }
+
+    function getCenters(selectedSector) {
+      const source = selectedSector === 'todos'
+        ? DATA
+        : DATA.filter(item => item.sector === selectedSector);
+      return ['todos', ...new Set(source.map(item => item.centro))];
+    }
+
+    function populateSelect(select, values, allLabel) {
+      const current = select.value;
+      select.innerHTML = '';
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value === 'todos' ? allLabel : value;
+        select.appendChild(option);
+      });
+      if ([...select.options].some(opt => opt.value === current)) {
+        select.value = current;
+      }
+    }
+
+    function getFilteredData() {
+      const text = searchInput.value.trim().toLowerCase();
+      const sector = sectorSelect.value;
+      const centro = centroSelect.value;
+
+      return DATA.filter(item => {
+        const haystack = `${item.jrv} ${item.sector} ${item.centro}`.toLowerCase();
+        const matchesSearch = haystack.includes(text);
+        const matchesSector = sector === 'todos' || item.sector === sector;
+        const matchesCenter = centro === 'todos' || item.centro === centro;
+        return matchesSearch && matchesSector && matchesCenter;
+      });
+    }
+
+    function getTotals(rows) {
+      return rows.reduce((acc, row) => {
+        acc.plh += row.plh;
+        acc.pnh += row.pnh;
+        acc.blanco += row.blanco;
+        acc.nulo += row.nulo;
+        acc.total += row.total;
+        return acc;
+      }, { plh: 0, pnh: 0, blanco: 0, nulo: 0, total: 0 });
+    }
+
+    function getByCenter(rows) {
+      const map = new Map();
+      rows.forEach(row => {
+        if (!map.has(row.centro)) {
+          map.set(row.centro, { centro: row.centro, plh: 0, pnh: 0, blanco: 0, nulo: 0, total: 0, jrvs: 0 });
+        }
+        const item = map.get(row.centro);
+        item.plh += row.plh;
+        item.pnh += row.pnh;
+        item.blanco += row.blanco;
+        item.nulo += row.nulo;
+        item.total += row.total;
+        item.jrvs += 1;
+      });
+      return [...map.values()].sort((a, b) => b.total - a.total);
+    }
+
+    function renderStats(rows, totals) {
+      const winner = totals.plh >= totals.pnh ? 'PLH' : 'PNH';
+      const diff = Math.abs(totals.plh - totals.pnh);
+      document.getElementById('stat-jrvs').textContent = rows.length;
+      document.getElementById('stat-total').textContent = formatNumber(totals.total);
+      document.getElementById('stat-winner').textContent = winner;
+      document.getElementById('stat-diff').textContent = formatNumber(diff);
+
+      document.getElementById('sum-plh').textContent = formatNumber(totals.plh);
+      document.getElementById('sum-pnh').textContent = formatNumber(totals.pnh);
+      document.getElementById('sum-blanco').textContent = formatNumber(totals.blanco);
+      document.getElementById('sum-nulo').textContent = formatNumber(totals.nulo);
+    }
+
+    function renderProgress(totals) {
+      const items = [
+        { label: 'PLH', value: totals.plh, color: COLORS.plh },
+        { label: 'PNH', value: totals.pnh, color: COLORS.pnh },
+        { label: 'Blancos', value: totals.blanco, color: COLORS.blanco },
+        { label: 'Nulos', value: totals.nulo, color: COLORS.nulo },
+      ];
+
+      progressGroup.innerHTML = items.map(item => `
+        <div>
+          <div class="progress-label">
+            <span>${item.label}</span>
+            <span>${formatPct(item.value, totals.total)}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar" style="width:${formatPct(item.value, totals.total)};background:${item.color}"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderTable(rows) {
+      tableBody.innerHTML = rows.map(row => {
+        const leader = row.plh >= row.pnh ? 'PLH' : 'PNH';
+        return `
+          <tr>
+            <td><strong>${row.jrv}</strong></td>
+            <td>${row.sector}</td>
+            <td>${row.centro}</td>
+            <td class="text-right">${formatNumber(row.plh)}</td>
+            <td class="text-right">${formatNumber(row.pnh)}</td>
+            <td class="text-right">${formatNumber(row.blanco)}</td>
+            <td class="text-right">${formatNumber(row.nulo)}</td>
+            <td class="text-right"><strong>${formatNumber(row.total)}</strong></td>
+            <td class="text-right"><span class="leader ${leader.toLowerCase()}">${leader}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderCenters(rows, totals) {
+      const byCenter = getByCenter(rows);
+      centersList.innerHTML = byCenter.map(center => `
+        <div class="center-card">
+          <div class="center-top">
+            <div>
+              <div style="font-weight:800">${center.centro}</div>
+              <div style="font-size:.82rem;color:var(--muted)">${center.jrvs} JRV(s)</div>
+            </div>
+            <div class="pill">${formatNumber(center.total)} votos</div>
+          </div>
+          <div class="mini-grid">
+            <div class="mini" style="background:#fef2f2">PLH<strong style="color:#b91c1c">${formatNumber(center.plh)}</strong></div>
+            <div class="mini" style="background:#eff6ff">PNH<strong style="color:#1d4ed8">${formatNumber(center.pnh)}</strong></div>
+            <div class="mini">Blanco<strong>${formatNumber(center.blanco)}</strong></div>
+            <div class="mini" style="background:#fffbeb">Nulo<strong style="color:#b45309">${formatNumber(center.nulo)}</strong></div>
+          </div>
+        </div>
+      `).join('');
+
+      const maxCenter = byCenter[0];
+      notes.innerHTML = `
+        <div class="note">
+          <h4>Resultado general</h4>
+          <p>El PLH lidera en el consolidado filtrado con ${formatNumber(totals.plh)} votos frente a ${formatNumber(totals.pnh)} del PNH.</p>
+        </div>
+        <div class="note">
+          <h4>Votos no partidarios</h4>
+          <p>Se registran ${formatNumber(totals.blanco)} votos en blanco y ${formatNumber(totals.nulo)} voto(s) nulo(s) en la vista actual.</p>
+        </div>
+        <div class="note">
+          <h4>Centro con mayor carga</h4>
+          <p>${maxCenter ? maxCenter.centro : '—'} concentra ${maxCenter ? formatNumber(maxCenter.total) : 0} votos, el mayor total dentro del filtro aplicado.</p>
+        </div>
+        <div class="note">
+          <h4>Cobertura</h4>
+          <p>El tablero incluye 13 actas/JRVs visibles en el PDF suministrado y permite revisar el detalle una por una.</p>
+        </div>
+      `;
+    }
+
+    function renderCharts(rows, totals) {
+      const labels = rows.map(r => String(r.jrv));
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' }
+        }
+      };
+
+      if (barChart) barChart.destroy();
+      if (pieChart) pieChart.destroy();
+
+      barChart = new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'PLH', data: rows.map(r => r.plh), backgroundColor: COLORS.plh, borderRadius: 8 },
+            { label: 'PNH', data: rows.map(r => r.pnh), backgroundColor: COLORS.pnh, borderRadius: 8 },
+            { label: 'Blanco', data: rows.map(r => r.blanco), backgroundColor: COLORS.blanco, borderRadius: 8 },
+            { label: 'Nulo', data: rows.map(r => r.nulo), backgroundColor: COLORS.nulo, borderRadius: 8 },
+          ]
+        },
+        options: {
+          ...commonOptions,
+          scales: {
+            x: { ticks: { maxRotation: 45, minRotation: 45 } },
+            y: { beginAtZero: true }
+          }
+        }
+      });
+
+      pieChart = new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['PLH', 'PNH', 'Blanco', 'Nulo'],
+          datasets: [{
+            data: [totals.plh, totals.pnh, totals.blanco, totals.nulo],
+            backgroundColor: [COLORS.plh, COLORS.pnh, COLORS.blanco, COLORS.nulo],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          ...commonOptions,
+          cutout: '58%'
+        }
+      });
+    }
+
+    function updateDashboard() {
+      const rows = getFilteredData();
+      const totals = getTotals(rows);
+      renderStats(rows, totals);
+      renderProgress(totals);
+      renderTable(rows);
+      renderCenters(rows, totals);
+      renderCharts(rows, totals);
+    }
+
+    function setupTabs() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        });
+      });
+    }
+
+    function initFilters() {
+      populateSelect(sectorSelect, getSectors(), 'Todos los sectores');
+      populateSelect(centroSelect, getCenters('todos'), 'Todos los centros');
+
+      sectorSelect.addEventListener('change', () => {
+        populateSelect(centroSelect, getCenters(sectorSelect.value), 'Todos los centros');
+        centroSelect.value = 'todos';
+        updateDashboard();
+      });
+
+      centroSelect.addEventListener('change', updateDashboard);
+      searchInput.addEventListener('input', updateDashboard);
+    }
+
+    setupTabs();
+    initFilters();
+    updateDashboard();
+  </script>
+</body>
+</html>
