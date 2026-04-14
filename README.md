@@ -4,7 +4,7 @@ Proyecto web estático con un dashboard interactivo en `index.html` para visuali
 
 ## Ver en vivo
 
-Pendiente de publicación en GitHub Pages.
+[Abrir sitio publicado](https://astorskywalker.github.io/ee2026-guanaja/)
 
 ## Archivo principal
 
